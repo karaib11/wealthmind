@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEALTH MIND — Financial Life Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dim: #8B6E2E;
+  --dark: #0D0D0B;
+  --dark2: #141410;
+  --dark3: #1C1C17;
+  --dark4: #252520;
+  --dark5: #2E2E28;
+  --cream: #F5EFE0;
+  --cream2: #E8DEC8;
+  --muted: #7A7468;
+  --muted2: #5A5650;
+  --red: #C45C3A;
+  --green: #4A8C5C;
+  --blue: #3A6FA8;
+  --r: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--dark);
+  color: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.screen { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* INTRO */
+#screen-intro {
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #1E1A0E 0%, var(--dark) 70%);
+}
+.intro-ornament { font-size: 11px; letter-spacing: 4px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease 0.2s forwards; }
+.intro-title { font-family: 'Playfair Display', serif; font-size: clamp(52px, 10vw, 88px); font-weight: 700; line-height: 0.95; letter-spacing: -2px; color: var(--cream); margin-bottom: 8px; opacity: 0; animation: fadeUp 0.8s ease 0.4s forwards; }
+.intro-title span { color: var(--gold); }
+.intro-sub { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(14px, 2.5vw, 19px); color: var(--muted); margin-bottom: 48px; opacity: 0; animation: fadeUp 0.8s ease 0.6s forwards; }
+.intro-desc { max-width: 480px; font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 48px; opacity: 0; animation: fadeUp 0.8s ease 0.8s forwards; }
+.intro-desc strong { color: var(--cream2); font-weight: 500; }
+.btn-primary { background: var(--gold); color: var(--dark); border: none; padding: 16px 40px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: all 0.2s; opacity: 0; animation: fadeUp 0.8s ease 1s forwards; }
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+.intro-tags { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 40px; opacity: 0; animation: fadeUp 0.8s ease 1.1s forwards; }
+.intro-tag { font-size: 11px; letter-spacing: 1px; color: var(--muted2); border: 0.5px solid var(--muted2); border-radius: 20px; padding: 5px 14px; text-transform: uppercase; }
+
+/* NAME */
+#screen-name { align-items: center; justify-content: center; padding: 40px 24px; text-align: center; }
+.name-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 600; margin-bottom: 8px; }
+.name-sub { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+.name-input { background: var(--dark3); border: 1px solid var(--dark5); border-radius: var(--r); color: var(--cream); font-family: 'Playfair Display', serif; font-size: 28px; text-align: center; padding: 16px 24px; width: 100%; max-width: 400px; outline: none; transition: border-color 0.2s; margin-bottom: 24px; display: block; margin-left: auto; margin-right: auto; }
+.name-input:focus { border-color: var(--gold-dim); }
+.name-input::placeholder { color: var(--muted2); }
+
+/* ARCHETYPE */
+#screen-archetype { padding: 40px 24px; align-items: center; justify-content: center; min-height: 100vh; }
+.arch-header { text-align: center; margin-bottom: 40px; }
+.arch-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+.arch-sub { color: var(--muted); font-size: 14px; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+.arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; max-width: 900px; width: 100%; }
+.arch-card { background: var(--dark3); border: 1px solid var(--dark5); border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.2s; text-align: left; }
+.arch-card:hover { border-color: var(--gold-dim); transform: translateY(-2px); background: var(--dark4); }
+.arch-card.selected { border-color: var(--gold); background: var(--dark4); }
+.arch-icon { font-size: 32px; margin-bottom: 12px; }
+.arch-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-bottom: 6px; color: var(--cream); }
+.arch-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.arch-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.arch-stat { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+.stat-money { background: rgba(74,140,92,0.15); color: #6DB882; }
+.stat-stress { background: rgba(196,92,58,0.15); color: #E07855; }
+.stat-free { background: rgba(58,111,168,0.15); color: #6A9FD0; }
+.stat-happy { background: rgba(201,168,76,0.15); color: var(--gold); }
+
+/* GAME HEADER */
+#screen-game { padding: 0; flex-direction: column; }
+.game-header { background: var(--dark2); border-bottom: 1px solid var(--dark5); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.game-logo { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.game-logo span { color: var(--gold); }
+.player-name-badge { font-size: 12px; color: var(--muted); background: var(--dark4); padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--dark5); }
+.age-badge { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--gold); }
+
+/* STATS BAR */
+.stats-bar { background: var(--dark3); border-bottom: 1px solid var(--dark5); padding: 12px 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat-item { display: flex; flex-direction: column; gap: 5px; }
+.stat-header { display: flex; justify-content: space-between; align-items: center; }
+.stat-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.stat-val { font-size: 13px; font-weight: 500; }
+.stat-track { height: 3px; background: var(--dark5); border-radius: 2px; overflow: hidden; }
+.stat-fill { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.fill-money { background: var(--green); }
+.fill-freedom { background: var(--blue); }
+.fill-stress { background: var(--red); }
+.fill-happy { background: var(--gold); }
+
+/* EPOCH BAR */
+.epoch-bar { background: var(--dark2); padding: 12px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--dark5); }
+.epoch-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.epoch-track { flex: 1; height: 2px; background: var(--dark5); border-radius: 1px; position: relative; }
+.epoch-fill { height: 100%; background: var(--gold); border-radius: 1px; transition: width 0.5s ease; }
+.epoch-dots { display: flex; gap: 0; position: absolute; top: -4px; left: 0; right: 0; justify-content: space-between; }
+.epoch-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dark5); border: 2px solid var(--dark3); transition: all 0.3s; }
+.epoch-dot.done { background: var(--gold); }
+.epoch-dot.active { background: var(--gold-light); box-shadow: 0 0 6px var(--gold); }
+.epoch-step { font-size: 11px; color: var(--muted); font-family: 'Playfair Display', serif; font-style: italic; }
+
+/* SCENARIO */
+.scenario-area { flex: 1; padding: 32px 24px; max-width: 720px; margin: 0 auto; width: 100%; }
+.event-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 20px; }
+.event-badge::before { content: ''; width: 20px; height: 1px; background: var(--gold-dim); }
+.event-badge::after { content: ''; width: 20px; height: 1px; background: var(--gold-dim); }
+.scenario-card { background: var(--dark3); border: 1px solid var(--dark5); border-radius: 16px; padding: 32px; margin-bottom: 24px; animation: fadeUp 0.5s ease forwards; }
+.scenario-context { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.scenario-question { font-family: 'Playfair Display', serif; font-size: clamp(18px, 3vw, 24px); font-weight: 600; line-height: 1.4; color: var(--cream); margin-bottom: 8px; }
+.scenario-setup { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+.choices { display: flex; flex-direction: column; gap: 12px; }
+.choice-btn { background: var(--dark4); border: 1px solid var(--dark5); border-radius: 10px; padding: 18px 20px; cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; display: flex; align-items: flex-start; gap: 14px; color: var(--cream2); }
+.choice-btn:hover { border-color: var(--gold-dim); background: var(--dark5); }
+.choice-btn.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.choice-btn.wrong { border-color: var(--red); background: rgba(196,92,58,0.08); }
+.choice-btn.neutral-pick { border-color: var(--blue); background: rgba(58,111,168,0.08); }
+.choice-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--dark5); border: 1px solid var(--muted2); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--muted); transition: all 0.2s; }
+.choice-btn.selected .choice-letter { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+.choice-btn.wrong .choice-letter { background: var(--red); border-color: var(--red); color: white; }
+.choice-btn.neutral-pick .choice-letter { background: var(--blue); border-color: var(--blue); color: white; }
+.choice-text { font-size: 14px; line-height: 1.5; flex: 1; }
+.choice-text strong { display: block; margin-bottom: 3px; font-weight: 500; color: var(--cream); }
+.choice-desc { font-size: 12px; color: var(--muted); }
+
+/* CONSEQUENCE */
+.consequence-panel { background: var(--dark2); border: 1px solid var(--dark5); border-radius: 12px; padding: 24px; margin-top: 20px; animation: fadeUp 0.4s ease forwards; display: none; }
+.consequence-panel.show { display: block; }
+.consequence-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; margin-bottom: 10px; color: var(--cream); }
+.consequence-text { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+.stat-changes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.stat-change { font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 500; }
+.change-pos { background: rgba(74,140,92,0.15); color: #6DB882; }
+.change-neg { background: rgba(196,92,58,0.15); color: #E07855; }
+.insight-box { background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.2); border-radius: 8px; padding: 16px; margin-top: 16px; }
+.insight-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 6px; }
+.insight-text { font-size: 13px; color: var(--cream2); line-height: 1.6; font-style: italic; }
+.btn-next { background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 20px; display: block; }
+.btn-next:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+
+/* TRANSITION */
+#screen-transition { align-items: center; justify-content: center; text-align: center; padding: 40px 24px; background: radial-gradient(ellipse 60% 50% at 50% 50%, #1A150A 0%, var(--dark) 70%); }
+.trans-ornament { font-size: 48px; margin-bottom: 24px; }
+.trans-epoch { font-size: 11px; letter-spacing: 4px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 8px; }
+.trans-title { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700; margin-bottom: 12px; }
+.trans-age { font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; color: var(--muted); margin-bottom: 32px; }
+.trans-desc { max-width: 440px; font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 40px; }
+.trans-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 360px; margin-bottom: 40px; }
+.trans-stat { background: var(--dark3); border: 1px solid var(--dark5); border-radius: 8px; padding: 14px; }
+.trans-stat-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.trans-stat-val { font-size: 20px; font-weight: 500; }
+
+/* RESULT */
+#screen-result { padding: 40px 24px; align-items: center; justify-content: center; min-height: 100vh; background: radial-gradient(ellipse 80% 60% at 50% 0%, #1A150A 0%, var(--dark) 60%); }
+.result-inner { max-width: 680px; width: 100%; }
+.result-ornament { font-size: 11px; letter-spacing: 4px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 32px; text-align: center; }
+.result-archetype-name { font-family: 'Playfair Display', serif; font-size: clamp(32px, 6vw, 52px); font-weight: 700; text-align: center; margin-bottom: 8px; color: var(--gold); }
+.result-tagline { font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; color: var(--muted); text-align: center; margin-bottom: 40px; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.result-stat-card { background: var(--dark3); border: 1px solid var(--dark5); border-radius: 12px; padding: 20px; text-align: center; }
+.result-stat-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.result-stat-val { font-size: 36px; font-weight: 500; }
+.result-stat-bar { margin-top: 10px; height: 4px; background: var(--dark5); border-radius: 2px; overflow: hidden; }
+.result-stat-fill { height: 100%; border-radius: 2px; }
+.insights-section { margin-bottom: 32px; }
+.insights-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; margin-bottom: 16px; color: var(--cream); }
+.insight-card { background: var(--dark3); border: 1px solid var(--dark5); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; }
+.insight-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--dark5); line-height: 1; flex-shrink: 0; }
+.insight-content-title { font-size: 14px; font-weight: 500; color: var(--cream); margin-bottom: 6px; }
+.insight-content-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.patterns-section { margin-bottom: 32px; }
+.pattern-item { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--dark5); }
+.pattern-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pattern-text { font-size: 14px; color: var(--cream2); }
+.pattern-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.action-section { background: var(--dark3); border: 1px solid var(--dark5); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+.action-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+.action-item { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+.action-check { width: 20px; height: 20px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid var(--gold-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.action-check::after { content: '✓'; font-size: 10px; color: var(--gold); }
+.action-text { font-size: 14px; color: var(--cream2); line-height: 1.5; }
+.replay-section { text-align: center; }
+.btn-replay { background: var(--gold); color: var(--dark); border: none; padding: 16px 40px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; display: inline-block; }
+.btn-replay:hover { background: var(--gold-light); }
+.replay-hint { font-size: 12px; color: var(--muted); }
+
+/* RANDOM EVENT */
+.random-event-banner { background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05)); border: 1px solid rgba(201,168,76,0.3); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 12px; align-items: center; }
+.random-icon { font-size: 24px; flex-shrink: 0; }
+.random-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 4px; }
+.random-text { font-size: 14px; color: var(--cream2); line-height: 1.5; }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--dark2); }
+::-webkit-scrollbar-thumb { background: var(--dark5); border-radius: 2px; }
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .result-grid { grid-template-columns: 1fr; }
+  .scenario-card { padding: 20px; }
+  .arch-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-ornament">Financial Psychology · Life Simulation</div>
+  <h1 class="intro-title">WEALTH<br><span>MIND</span></h1>
+  <div class="intro-sub">A 40-year journey through your financial life</div>
+  <p class="intro-desc">Прожи&shy;ви <strong>40 лет финансовой жизни</strong> за 30 минут. Принимай решения о карьере, жилье, инвестициях и отношениях — и узнай, какой <strong>финансовый архетип</strong> скрывается в тебе.</p>
+  <button class="btn-primary" onclick="goTo('screen-name')">Начать игру</button>
+  <div class="intro-tags">
+    <span class="intro-tag">психология денег</span>
+    <span class="intro-tag">60 сценариев</span>
+    <span class="intro-tag">6 архетипов</span>
+    <span class="intro-tag">реальные инсайты</span>
+  </div>
+</div>
+
+<!-- NAME -->
+<div id="screen-name" class="screen">
+  <div style="font-family:'Playfair Display',serif;font-size:13px;color:var(--gold-dim);letter-spacing:2px;text-transform:uppercase;padding:24px;border-bottom:1px solid var(--dark5);">Wealth Mind</div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 24px;text-align:center;">
+    <div class="name-title">Как тебя зовут?</div>
+    <div class="name-sub">Это персонализирует твой финансовый архетип в конце игры</div>
+    <input type="text" class="name-input" id="player-name-input" placeholder="Твоё имя" maxlength="20" onkeydown="if(event.key==='Enter')confirmName()">
+    <button class="btn-primary" onclick="confirmName()">Продолжить →</button>
+  </div>
+</div>
+
+<!-- ARCHETYPE SELECT -->
+<div id="screen-archetype" class="screen">
+  <div style="font-family:'Playfair Display',serif;font-size:13px;color:var(--gold-dim);letter-spacing:2px;text-transform:uppercase;padding:24px;border-bottom:1px solid var(--dark5);width:100%;">Wealth Mind</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;width:100%;">
+    <div class="arch-header">
+      <div class="arch-title">Выбери своё начало</div>
+      <div class="arch-sub">Это не характер — это стартовые условия. У каждого пути своя правда.</div>
+    </div>
+    <div class="arch-grid">
+      <div class="arch-card" onclick="selectArchetype(0)">
+        <div class="arch-icon">🎓</div>
+        <div class="arch-name">Отличник</div>
+        <div class="arch-desc">Стабильная работа, хорошая зарплата с первого дня. Всё по плану — и в этом и сила, и ловушка.</div>
+        <div class="arch-stats"><span class="arch-stat stat-money">Деньги +20</span><span class="arch-stat stat-stress">Стресс -10</span></div>
+      </div>
+      <div class="arch-card" onclick="selectArchetype(1)">
+        <div class="arch-icon">🎲</div>
+        <div class="arch-name">Риск-тейкер</div>
+        <div class="arch-desc">Живёшь на грани. Стартапы, ставки, интуиция. Можешь выиграть всё — или потерять.</div>
+        <div class="arch-stats"><span class="arch-stat stat-free">Свобода +20</span><span class="arch-stat stat-stress">Стресс +15</span></div>
+      </div>
+      <div class="arch-card" onclick="selectArchetype(2)">
+        <div class="arch-icon">🛡</div>
+        <div class="arch-name">Осторожный</div>
+        <div class="arch-desc">Сначала подумай, потом действуй. Медленно, но верно. Риск — враг, стабильность — религия.</div>
+        <div class="arch-stats"><span class="arch-stat stat-money">Деньги +10</span><span class="arch-stat stat-happy">Счастье +10</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-logo">WEALTH <span>MIND</span></div>
+    <div class="age-badge" id="current-age">22 лет</div>
+    <div class="player-name-badge" id="header-name">Игрок</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-header"><span class="stat-label">💰 Капитал</span><span class="stat-val" id="sv-money" style="color:#6DB882">50</span></div>
+      <div class="stat-track"><div class="stat-fill fill-money" id="sf-money" style="width:50%"></div></div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-header"><span class="stat-label">🕊 Свобода</span><span class="stat-val" id="sv-freedom" style="color:#6A9FD0">50</span></div>
+      <div class="stat-track"><div class="stat-fill fill-freedom" id="sf-freedom" style="width:50%"></div></div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-header"><span class="stat-label">🔥 Стресс</span><span class="stat-val" id="sv-stress" style="color:#E07855">30</span></div>
+      <div class="stat-track"><div class="stat-fill fill-stress" id="sf-stress" style="width:30%"></div></div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-header"><span class="stat-label">✨ Счастье</span><span class="stat-val" id="sv-happy" style="color:#C9A84C">50</span></div>
+      <div class="stat-track"><div class="stat-fill fill-happy" id="sf-happy" style="width:50%"></div></div>
+    </div>
+  </div>
+  <div class="epoch-bar">
+    <span class="epoch-label" id="epoch-label">Эпоха 1</span>
+    <div class="epoch-track">
+      <div class="epoch-fill" id="epoch-fill" style="width:0%"></div>
+      <div class="epoch-dots" id="epoch-dots"></div>
+    </div>
+    <span class="epoch-step" id="epoch-step">Старт жизни</span>
+  </div>
+  <div class="scenario-area" id="scenario-area"></div>
+</div>
+
+<!-- EPOCH TRANSITION -->
+<div id="screen-transition" class="screen">
+  <div class="trans-ornament" id="trans-icon">🌱</div>
+  <div class="trans-epoch" id="trans-epoch">Эпоха 1 завершена</div>
+  <div class="trans-title" id="trans-title">Старт</div>
+  <div class="trans-age" id="trans-age">Тебе 28 лет</div>
+  <div class="trans-desc" id="trans-desc">Первые годы позади.</div>
+  <div class="trans-summary">
+    <div class="trans-stat"><div class="trans-stat-label">Капитал</div><div class="trans-stat-val" id="ts-money" style="color:#6DB882">—</div></div>
+    <div class="trans-stat"><div class="trans-stat-label">Свобода</div><div class="trans-stat-val" id="ts-free" style="color:#6A9FD0">—</div></div>
+    <div class="trans-stat"><div class="trans-stat-label">Стресс</div><div class="trans-stat-val" id="ts-stress" style="color:#E07855">—</div></div>
+    <div class="trans-stat"><div class="trans-stat-label">Счастье</div><div class="trans-stat-val" id="ts-happy" style="color:#C9A84C">—</div></div>
+  </div>
+  <button class="btn-primary" id="trans-btn" onclick="continueAfterTransition()">Продолжить →</button>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="screen-result" class="screen">
+  <div class="result-inner">
+    <div class="result-ornament">Твой финансовый архетип</div>
+    <div class="result-archetype-name" id="res-arch-name">—</div>
+    <div class="result-tagline" id="res-arch-tagline">—</div>
+    <div class="result-grid">
+      <div class="result-stat-card"><div class="result-stat-label">💰 Капитал</div><div class="result-stat-val" id="res-money" style="color:#6DB882">—</div><div class="result-stat-bar"><div class="result-stat-fill fill-money" id="res-fill-money"></div></div></div>
+      <div class="result-stat-card"><div class="result-stat-label">🕊 Свобода</div><div class="result-stat-val" id="res-freedom" style="color:#6A9FD0">—</div><div class="result-stat-bar"><div class="result-stat-fill fill-freedom" id="res-fill-freedom"></div></div></div>
+      <div class="result-stat-card"><div class="result-stat-label">🔥 Стресс</div><div class="result-stat-val" id="res-stress" style="color:#E07855">—</div><div class="result-stat-bar"><div class="result-stat-fill fill-stress" id="res-fill-stress"></div></div></div>
+      <div class="result-stat-card"><div class="result-stat-label">✨ Счастье</div><div class="result-stat-val" id="res-happy" style="color:#C9A84C">—</div><div class="result-stat-bar"><div class="result-stat-fill fill-happy" id="res-fill-happy"></div></div></div>
+    </div>
+    <div class="insights-section"><div class="insights-title">Твои психологические инсайты</div><div id="insights-list"></div></div>
+    <div class="patterns-section"><div class="insights-title" style="font-size:18px;margin-bottom:12px;">Паттерны твоего мышления</div><div id="patterns-list"></div></div>
+    <div class="action-section"><div class="action-title">3 шага, которые изменят твою финансовую жизнь</div><div id="actions-list"></div></div>
+    <div class="replay-section">
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:var(--muted);margin-bottom:24px;" id="res-closing-quote"></div>
+      <button class="btn-replay" onclick="restartGame()">Сыграть снова</button>
+      <div class="replay-hint">Другие выборы → другой архетип → другая жизнь</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EPOCHS = [
+  { name: 'Старт', icon: '🌱', ages: '22–28', endAge: '28 лет', desc: 'Первые годы позади. Ты сделал выборы, которые уже изменили твою траекторию — даже если пока не заметно.' },
+  { name: 'Рост', icon: '📈', ages: '28–35', endAge: '35 лет', desc: 'Середина третьего десятилетия. Паттерны заложены. Пути расходятся. Твои деньги начинают работать — или нет.' },
+  { name: 'Построение', icon: '🏗', ages: '35–45', endAge: '45 лет', desc: 'Самое продуктивное десятилетие позади. Фундамент заложен — и теперь видно, насколько он прочный.' },
+  { name: 'Пик', icon: '⛰', ages: '45–55', endAge: '55 лет', desc: 'Пик доходов. Ошибки становятся дороже. Правильные решения — мощнее. Финал близко.' },
+  { name: 'Свобода', icon: '∞', ages: '55–62', endAge: '62 года', desc: 'Финальный отрезок. Каждый выбор прожитой жизни сложился в картину. Это — твой результат.' }
+];
+
+const SCENARIOS = [
+  // EPOCH 0
+  { epoch:0, type:'Карьерный выбор', age:'23 года', question:'Два оффера на руках', setup:'Компания A: $2800/мес, стабильность, скучно. Компания B: $1900/мес, стартап, хаос, акции 0.5%. Тебе 23 года и нет накоплений.',
+    choices:[
+      { text:'Компания A — деньги важнее', desc:'Безопасно. Платят хорошо.', type:'neutral', changes:{money:+12,freedom:-8,stress:-5,happy:+5}, consequence:'Хорошая зарплата с первого дня. Через 5 лет стартап продаётся за $4M. Твои 0.5% = $20,000. Ты упустил, но и не потерял — ты всё это время откладывал.', insight:'Ловушка определённости: мы переоцениваем стабильность и недооцениваем опциональность. Акции стартапа — лотерейный билет, но в 23 года это единственное время, когда он почти бесплатный.' },
+      { text:'Стартап — это мой шанс', desc:'Рискованно. Захватывающе.', type:'good', changes:{money:-5,freedom:+15,stress:+20,happy:+15}, consequence:'Первый год тяжёлый. Через 4 года — продажа. Твоя доля: $20,000 + огромный опыт и сеть контактов. Ты стал другим человеком.', insight:'Асимметрия риска: в 23 года цена неудачи минимальна — время для восстановления максимально, а потенциал нелинейный. Молодость — это актив, который исчезает.' },
+      { text:'Ещё подожду — найду лучшее', desc:'Подожду идеального.', type:'wrong', changes:{money:-10,freedom:-5,stress:+10,happy:-10}, consequence:'Оба оффера отозваны через неделю. Следующий оффер — хуже. Три месяца простоя съедают накопления. Ты начинаешь с нуля, но позже.', insight:'Паралич перфекциониста: ожидание "идеального" варианта — одна из самых дорогостоящих финансовых ошибок. Хорошее решение сегодня лучше идеального никогда.' }
+    ]
+  },
+  { epoch:0, type:'Образ жизни', age:'24 года', question:'Первая нормальная зарплата', setup:'Ты начал нормально зарабатывать. Все друзья снимают крутые квартиры, ходят в рестораны, покупают вещи. Ты можешь то же самое — или откладывать.',
+    choices:[
+      { text:'Жить на полную — заслужил', desc:'Трачу так же, как зарабатываю.', type:'wrong', changes:{money:-15,freedom:-10,stress:+5,happy:+15}, consequence:'Отличная жизнь сейчас. К 28 годам — нулевые накопления. Друзья, откладывавшие 20%, имеют $15,000–20,000 инвестиций.', insight:'Lifestyle inflation: с ростом дохода растут расходы, сбережения — нулевые. Это "беговая дорожка гедониста" — скорость растёт, расстояние нет.' },
+      { text:'Откладываю 20% с первого дня', desc:'Плачу сначала себе.', type:'good', changes:{money:+20,freedom:+10,stress:-5,happy:+5}, consequence:'20% автоматически уходят в инвестиции. К 28 годам: $12,000–18,000 на счету и привычка, которую уже не нужно контролировать. Это фундамент.', insight:'Принцип "Pay Yourself First": автоматические сбережения работают, не требуя силы воли. Мозг адаптируется к любому уровню расходов — пусть адаптируется к меньшему.' },
+      { text:'Откладываю 10% — компромисс', desc:'И живу, и коплю.', type:'neutral', changes:{money:+8,freedom:+5,stress:0,happy:+10}, consequence:'Разумный компромисс. К 28 годам около $7,000. Меньше, чем при 20%, но привычка сформирована — и это главное.', insight:'Важно не процент, а система. Даже 10% автоматически — победа над 0%. Главное — начать.' }
+    ]
+  },
+  { epoch:0, type:'Финансовое давление', age:'25 лет', question:'Все вокруг покупают крипту', setup:'Твой друг за месяц удвоил $3,000. Все только об этом. У тебя $4,000 накоплений — и ты чувствуешь, что упускаешь главный шанс жизни.',
+    choices:[
+      { text:'Вложить всё — FOMO невыносим', desc:'Нельзя упустить этот момент.', type:'wrong', changes:{money:-20,freedom:-5,stress:+25,happy:-5}, consequence:'Рынок растёт 3 месяца — эйфория. Потом обвал -75%. Твои $4,000 → $1,000. Психологическая травма надолго отвращает от инвестиций.', insight:'FOMO + herd mentality = финансовая катастрофа. Когда все говорят об одном активе — пик близко. Паника и жадность — главные враги инвестора.' },
+      { text:'Вложить 20% — попробую', desc:'$800 не убьют.', type:'neutral', changes:{money:-3,freedom:0,stress:+5,happy:+5}, consequence:'Потерял $600. Неприятно, но не критично. Выучил урок про волатильность на небольшом опыте. Главные $3,200 целы.', insight:'Позиция "образовательного риска": вложи сумму, потерю которой переживёшь без боли. Лучший способ учиться — маленький, болезненный, реальный опыт.' },
+      { text:'Не трогать — я не понимаю это', desc:'Не понимаю — не вкладываю.', type:'good', changes:{money:+5,freedom:+5,stress:-5,happy:+5}, consequence:'Тяжело наблюдать чужой рост. Через полгода рынок обваливается. Твои $4,000 целы. Ты покупаешь на дне.', insight:'Баффет: "Правило №1 — не теряй деньги. Правило №2 — не забывай правило №1." Непонимание актива — достаточная причина не вкладывать. Это дисциплина, не трусость.' }
+    ]
+  },
+  { epoch:0, type:'Долг', age:'26 лет', question:'Тебе предлагают кредитную карту', setup:'Банк одобрил карту с лимитом $5,000 и кэшбэком 3%. "Это удобный инструмент" — говорит менеджер.',
+    choices:[
+      { text:'Взять — удобно и выгодно', desc:'Кэшбэк же!', type:'neutral', changes:{money:-8,freedom:-10,stress:+10,happy:+5}, consequence:'Первые месяцы — дисциплина. Потом случайные покупки, минимальные платежи. Через 2 года долг $2,000 под 24% годовых. Кэшбэк — $180. Убыток — $480.', insight:'Кредитные карты монетизируют твою оптимистичную самооценку. 40% людей несут баланс из месяца в месяц. Ты планируешь быть в других 60%?' },
+      { text:'Взять, но платить полностью каждый месяц', desc:'Строгая дисциплина.', type:'good', changes:{money:+3,freedom:0,stress:0,happy:+3}, consequence:'Кэшбэк работает на тебя. Долга нет. Ты один из 30%, кто использует карту как инструмент.', insight:'Кредитная карта — нейтральный инструмент. "Безналичная боль" реальна — тратить цифры психологически легче. Это доказано исследованиями MIT.' },
+      { text:'Отказаться — не нужны соблазны', desc:'Лучше дебетовая.', type:'good', changes:{money:+5,freedom:+5,stress:-5,happy:+5}, consequence:'Никакого долга. Небольшой кэшбэк упущен, но сон крепче.', insight:'Знание своих слабостей — тоже мудрость. Убрать соблазн из уравнения умнее, чем бороться с ним каждый месяц.' }
+    ]
+  },
+  // EPOCH 1
+  { epoch:1, type:'Жильё', age:'30 лет', question:'Покупать или арендовать?', setup:'Банк одобрил ипотеку. Квартира $180,000, первый взнос $36,000 (все накопления). Платёж — 40% дохода. Аренда аналога — 22%. Риелтор: "Аренда — деньги на ветер".',
+    choices:[
+      { text:'Купить — аренда это выброшенные деньги', desc:'Своё жильё — всегда актив.', type:'wrong', changes:{money:-20,freedom:-25,stress:+35,happy:+10}, consequence:'Нулевые накопления, 40% дохода на ипотеку, ноль мобильности. Предложат работу мечты в другом городе — ты не можешь уехать. Через 10 лет квартира +30%, твой индексный фонд — +140%.', insight:'Миф "аренда = выброшенные деньги": ипотека тоже "выбрасывает" 60-70% первых платежей на проценты. Разница, вложенная в индексный фонд, статистически обгоняет рост недвижимости.' },
+      { text:'Арендовать и инвестировать разницу', desc:'Гибкость дороже кирпичей.', type:'good', changes:{money:+20,freedom:+20,stress:-15,happy:+10}, consequence:'$14,000 в год разницы уходят в инвестиции. К 45 годам портфель $350,000+. Ты мобилен, спокоен и богаче большинства ипотечников.', insight:'Роберт Шиллер (нобелевский лауреат): реальный рост цен на жильё — около 0.6% в год. Индексный фонд — 7-10%. Математика редко врёт.' },
+      { text:'Купить меньшую квартиру — платёж 25%', desc:'Актив без удушения.', type:'neutral', changes:{money:-8,freedom:-10,stress:+10,happy:+5}, consequence:'Разумный компромисс. Актив есть, ипотека терпима, небольшая инвестиция сохранена.', insight:'Правило 28/36: разумная ипотека — не более 28% дохода. Банки одобряют до 43% — это их интерес, не твой.' }
+    ]
+  },
+  { epoch:1, type:'Карьера', age:'31 год', question:'Повышение или смена работы?', setup:'Работодатель предлагает +15%. Конкурент — +40% с испытательным сроком. Уходить страшно — ты здесь 4 года.',
+    choices:[
+      { text:'Остаться — ценю стабильность', desc:'+15% и спокойный сон.', type:'wrong', changes:{money:+8,freedom:-5,stress:-10,happy:-5}, consequence:'Комфортно. Но люди, меняющие работу каждые 3-5 лет, зарабатывают на 50% больше за карьеру. Ты платишь "tax on comfort".', insight:'Loyalty tax: преданность одному работодателю статистически менее выгодна. Лучший способ поднять зарплату — иметь оффер снаружи.' },
+      { text:'Уйти — +40% это серьёзно', desc:'Риск оправдан деньгами.', type:'good', changes:{money:+25,freedom:+15,stress:+15,happy:+10}, consequence:'Испытательный срок пройден. Разница в зарплате за 5 лет — $80,000+. Страх уйти стоил дороже, чем переход.', insight:'Anchoring effect: мы "якоримся" на текущей зарплате. Страх потерять $2800 заставляет упустить $1200 ежемесячно — каждый месяц.' },
+      { text:'Использовать оффер как переговорный инструмент', desc:'Попросить +30% у текущего.', type:'good', changes:{money:+18,freedom:+5,stress:+5,happy:+15}, consequence:'Работодатель соглашается на +25%. Переговоры с позиции силы — навык на всю жизнь.', insight:'BATNA: лучшая переговорная позиция — реальная альтернатива. Оффер снаружи — это не угроза, это факт рынка.' }
+    ]
+  },
+  { epoch:1, type:'Отношения', age:'33 года', question:'Разговор о деньгах с партнёром', setup:'Вместе 2 года. Разные подходы: ты копишь, партнёр тратит. Напряжение. Друзья: "не порти отношения разговорами о деньгах".',
+    choices:[
+      { text:'Избегать темы — само разрешится', desc:'Не хочу конфликта.', type:'wrong', changes:{money:-10,freedom:-5,stress:+20,happy:-15}, consequence:'Тема не разрешается — накапливается. Через 3 года серьёзный конфликт. Финансы — причина №1 разводов. Молчание откладывало кризис, не предотвращало.', insight:'Финансовая совместимость — главный предиктор счастья в паре. 36% пар не знают точного дохода партнёра. Деньги — это ценности. Обсудить их — честность.' },
+      { text:'Поговорить честно, даже если uncomfortable', desc:'Лучше сейчас, чем потом.', type:'good', changes:{money:+5,freedom:+10,stress:+5,happy:+20}, consequence:'Сложный разговор. Нашли систему: общий счёт + личные счета. Напряжение снято, оба стиля уважены.', insight:'"Деньги — это разговор о ценностях". Пары, обсуждающие финансы открыто, счастливее долгосрочно. Дискомфорт одного разговора меньше, чем годы скрытого конфликта.' },
+      { text:'Разделить финансы полностью', desc:'Каждый сам по себе.', type:'neutral', changes:{money:+5,freedom:+10,stress:-5,happy:-5}, consequence:'Финансово чисто, но создаёт дистанцию. Без обсуждения общих целей — сложно двигаться вместе.', insight:'Нет единственно верной системы для пар. Есть обсуждённая и принятая обоими — это единственный критерий.' }
+    ]
+  },
+  { epoch:1, type:'Инвестиции', age:'34 года', question:'Первые серьёзные инвестиции', setup:'Есть $10,000, не нужные 10 лет. Три варианта: индексный фонд, акции одной компании, депозит под 5%.',
+    choices:[
+      { text:'Всё в одну акцию — высокий потенциал', desc:'Tesla, Apple — выбирать умею.', type:'wrong', changes:{money:-5,freedom:-5,stress:+20,happy:-5}, consequence:'Выбранная компания упала на 60%. $10,000 → $4,000. 85% активных инвесторов проигрывают индексу за 10 лет.', insight:'Иллюзия контроля: мы верим, что выберем "правильные" акции. Баффет в завещании: "Вложи 90% в индексный фонд S&P500." Диверсификация — единственный бесплатный обед в финансах.' },
+      { text:'Индексный фонд — скучно, но работает', desc:'Весь рынок сразу.', type:'good', changes:{money:+20,freedom:+5,stress:-10,happy:+10}, consequence:'Скучно. Через 10 лет при 8% роста: $21,600. Без стресса, без ошибок. 90% людей не переигрывают индекс.', insight:'Богл (Vanguard): "Не ищи иголку в стоге сена. Купи весь стог." Индексное инвестирование — смирение с тем, что рынок умнее любого инвестора. Это мудрость.' },
+      { text:'Банковский депозит — без риска', desc:'5% гарантированно.', type:'neutral', changes:{money:+8,freedom:0,stress:-15,happy:+5}, consequence:'5% в год = $16,300 через 10 лет. Инфляция 3-4% съедает большую часть реального роста. Безопасно, но ты не богатеешь.', insight:'Риск бездействия: депозит при инфляции — контролируемая потеря покупательной способности. "Безопасный" выбор — часто самый рискованный в долгосроке.' }
+    ]
+  },
+  // EPOCH 2
+  { epoch:2, type:'Карьерный рост', age:'37 лет', question:'Открыть бизнес или продолжать карьеру?', setup:'Хорошо зарабатываешь. Есть идея. Нужно $20,000 и 1 год без стабильного дохода. Семья, ипотека.',
+    choices:[
+      { text:'Открыть бизнес — пора', desc:'Работаю на себя.', type:'neutral', changes:{money:-15,freedom:+30,stress:+35,happy:+15}, consequence:'65% малого бизнеса закрывается в первые 5 лет. Если ты в 35% — доход выше найма и Свобода максимальная. Если нет — потеря $20K и 2 года.', insight:'Предпринимательство — не "работа на себя", а "нанять себя с максимальным риском и потенциалом". Вопрос: есть ли системное мышление и терпимость к неопределённости?' },
+      { text:'Остаться в найме — слишком рискованно', desc:'Время не то.', type:'neutral', changes:{money:+10,freedom:-5,stress:-10,happy:-5}, consequence:'Стабильно. Карьера растёт. Но через 5 лет — сожаление. Не о провале, а о непопытке. Этот вид сожаления острее.', insight:'Исследование Корнелла: люди сожалеют о несделанном больше, чем о сделанном. "Попробовал и не вышло" легче носить, чем "никогда не узнаю".' },
+      { text:'Запустить как side project, не бросая работу', desc:'Тест идеи без риска.', type:'good', changes:{money:+5,freedom:+15,stress:+15,happy:+20}, consequence:'Медленнее, но безопаснее. Через 2 года проект $800/мес. Уходишь из найма только когда это реальность, а не надежда.', insight:'Валидация до прыжка: самая умная проверка гипотезы — минимальная версия, пока есть запас безопасности. Большинство успешных предпринимателей начинали именно так.' }
+    ]
+  },
+  { epoch:2, type:'Потребление', age:'40 лет', question:'Машина мечты', setup:'Дела идут хорошо. Ты "заслужил" BMW — $60,000 в кредит на 5 лет. Или Honda $25,000 наличными. Или старая машина.',
+    choices:[
+      { text:'BMW — я заслужил успех', desc:'Хочу жить красиво.', type:'wrong', changes:{money:-25,freedom:-15,stress:+15,happy:+8}, consequence:'Счастье от машины: 3 месяца. Потом это просто машина. Кредит: $1,100/мес × 60 = $66,000. Плюс страховка. Через год привык — и хочешь следующую.', insight:'Hedonic adaptation: мы быстро адаптируемся к вещам. Счастье от покупки максимально в момент решения. Машина — худший актив: сразу -20% при выезде из салона.' },
+      { text:'Honda — надёжно и без кредита', desc:'Деньги работают.', type:'good', changes:{money:+15,freedom:+10,stress:-5,happy:+5}, consequence:'$35,000 разницы инвестированы. Через 10 лет при 8% = $75,000. Ты ездишь на хорошей машине и строишь состояние одновременно.', insight:'Правило богатства: богатые покупают активы, потом активы покупают им вещи. Статус через вещи — признак человека, который хочет казаться богатым.' },
+      { text:'Оставить старую — деньги нужны для другого', desc:'Машина — не приоритет.', type:'good', changes:{money:+20,freedom:+15,stress:-10,happy:+5}, consequence:'Максимальная инвестиционная позиция. Социально неудобно? Возможно. Финансово — оптимально.', insight:'Баффет ездит на Escalade за $35,000 при состоянии $130 миллиардов. Транспорт перемещает из А в Б — не более.' }
+    ]
+  },
+  { epoch:2, type:'Здоровье', age:'42 года', question:'Вложить в здоровье сейчас?', setup:'Работаешь много. Спортзал, питание, чекапы — $400/мес и 1 час в день. Или продолжать как есть.',
+    choices:[
+      { text:'Не тратить — потом займусь', desc:'Сейчас важнее работа.', type:'wrong', changes:{money:+5,freedom:-5,stress:+15,happy:-15}, consequence:'В 50 лет — серьёзные проблемы. Лечение $20,000+. Пропущенные месяцы. Продуктивность -40%. Экономия на здоровье — кредит с процентами.', insight:'Здоровье — актив с наибольшей доходностью. Инвестиция даёт ROI 300-500%: энергия, меньше болезней, дольше продуктивная жизнь. Нет активов без здорового владельца.' },
+      { text:'Приоритет здоровью — это инвестиция', desc:'$400/мес — не трата, а доход.', type:'good', changes:{money:-5,freedom:+5,stress:-20,happy:+25}, consequence:'В 50 лет — лучшая форма, чем большинство. Энергия, меньше больничных. Это мультиплицирует всё остальное.', insight:'Питер Аттиа: "Медицина 3.0 — создание физической маржи безопасности на десятилетия." Здоровье в 40 покупает качество жизни в 70.' },
+      { text:'Минимум: ходить, не курить, следить за сном', desc:'Бесплатные основы.', type:'neutral', changes:{money:0,freedom:+5,stress:-10,happy:+10}, consequence:'Базовый уровень поддержан. Не оптимально, но значительно лучше бездействия.', insight:'Мэттью Уолкер (нейроучёный): "Сон — единственная система восстановления всех органов одновременно." 7-8 часов = +20% к когнитивным способностям.' }
+    ]
+  },
+  // EPOCH 3
+  { epoch:3, type:'Инвестиционный выбор', age:'47 лет', question:'Друг предлагает войти в бизнес', setup:'Старый друг предлагает вложить $50,000 в ресторан. "Гарантирую 20% годовых". У тебя есть эти деньги.',
+    choices:[
+      { text:'Вложить — дружба и деньги', desc:'Он меня не подведёт.', type:'wrong', changes:{money:-25,freedom:-10,stress:+30,happy:-20}, consequence:'60% ресторанов закрываются в первые 3 года. Через 18 месяцев — банкротство. $50,000 потеряны. Дружба тоже.', insight:'Два правила: 1) "Гарантированная доходность 20%" — это ложь или незнание. Нет такого. 2) Никогда не смешивай дружбу и инвестиции, если не готов потерять и деньги, и дружбу.' },
+      { text:'Отказать — деньги и дружба не смешиваются', desc:'Мягко, но твёрдо.', type:'good', changes:{money:+10,freedom:+5,stress:-10,happy:+5}, consequence:'Через 2 года ресторан закрыт. Друг понимает — ты был прав. Деньги сохранены. Граница оказалась важнее сиюминутного комфорта.', insight:'"Нет" — это законченное предложение. Умение отказывать — финансовый навык первого класса. Каждое "да" плохой инвестиции = "нет" хорошей.' },
+      { text:'Дать как подарок, сколько готов потерять', desc:'$3,000 — помощь другу.', type:'neutral', changes:{money:-3,freedom:+5,stress:0,happy:+10}, consequence:'Психологически честно: помогаешь без иллюзий о возврате. Дружба жива. Основной капитал защищён.', insight:'Когда даёшь деньги близким — мысленно списывай их сразу. Если вернут — бонус. Это снимает ожидания и сохраняет отношения.' }
+    ]
+  },
+  { epoch:3, type:'Жизненный выбор', age:'50 лет', question:'Детям помочь или себе на пенсию?', setup:'Ребёнок поступил в дорогой университет. Не хватает $30,000. Можешь снять с пенсионного счёта или взять кредит.',
+    choices:[
+      { text:'Снять с пенсионного — ребёнок важнее', desc:'Родитель — значит жертвую.', type:'wrong', changes:{money:-20,freedom:-15,stress:+10,happy:+5}, consequence:'$30,000 в 50 лет = потеря $90,000+ к пенсии. Через 20 лет — ты сам нуждаешься в помощи детей.', insight:'В самолёте сначала надевают маску на себя. Пенсионные накопления — единственный долг перед будущим собой. У детей есть кредиты, стипендии, время. У тебя в 70 — нет.' },
+      { text:'Помочь частично, остальное — кредит ребёнка', desc:'$10,000 от меня, остальное — его ответственность.', type:'good', changes:{money:-8,freedom:0,stress:+5,happy:+15}, consequence:'Ребёнок учится, ты защищён. Дети с правильным отношением к долгу вырастают финансово ответственными.', insight:'Баланс заботы и ответственности. Дети, несущие часть ответственности за образование, учатся лучше и зарабатывают больше после.' },
+      { text:'Не трогать пенсионный — ищи стипендию', desc:'Твой выбор — твоя ответственность.', type:'neutral', changes:{money:+5,freedom:+5,stress:0,happy:-5}, consequence:'Финансово оптимально. Ребёнок находит стипендию и гордится. "Нет" — лучший подарок, учащий самостоятельности.', insight:'Разница между помощью и enablement. Родитель, который всегда спасает, лишает ребёнка главного навыка взрослой жизни — решать проблемы.' }
+    ]
+  },
+  // EPOCH 4
+  { epoch:4, type:'Итог жизни', age:'57 лет', question:'Ранняя пенсия?', setup:'Портфель позволяет уйти в 57. Правило 4%: при $500,000 можно снимать $20,000 в год. Или работать до 65 и иметь вдвое больше.',
+    choices:[
+      { text:'Уйти сейчас — время дороже денег', desc:'8 лет здоровья на счету.', type:'good', changes:{money:-10,freedom:+40,stress:-30,happy:+30}, consequence:'Ты покупаешь главный невосполнимый ресурс — время. 8 лет здоровья, путешествий, присутствия. Деньги ограничены, но достаточны.', insight:'Перкинс ("Die With Zero"): цель — не максимизировать портфель, а максимизировать жизненный опыт. Деньги — инструмент. Время — конечный ресурс. Правило 4% математически устойчиво.' },
+      { text:'Работать до 65 — больше безопасности', desc:'Ещё немного, потом отдохну.', type:'neutral', changes:{money:+20,freedom:-10,stress:+10,happy:-10}, consequence:'Портфель вырастет. Но 8 лет здоровья потрачены на работу. Люди в 65 часто уже не могут делать то, о чём мечтали в 55.', insight:'"Ещё немного" — ловушка, в которую попадают многие. Движущаяся цель безопасности: сначала $500K, потом $750K... Когда "достаточно"? Когда ты решаешь — не цифра.' },
+      { text:'Частичная занятость — 20 часов в неделю', desc:'Смысл + свобода + доход.', type:'good', changes:{money:+10,freedom:+25,stress:-15,happy:+25}, consequence:'Небольшой доход снижает нагрузку на портфель. Работа даёт смысл и структуру. Частичная занятость после 55 связана с более долгой и счастливой жизнью.', insight:'Пенсия не равно безделье. Смысл, вклад, принадлежность — психологические потребности. Лучший вопрос: "Что я хочу делать, если деньги не имеют значения?"' }
+    ]
+  },
+  { epoch:4, type:'Финальный выбор', age:'61 год', question:'Наследство или опыт?', setup:'Осталось больше, чем планировал. Два варианта: оставить детям или потратить на путешествия и опыт пока можешь.',
+    choices:[
+      { text:'Оставить детям — семья прежде всего', desc:'Мой вклад в их будущее.', type:'neutral', changes:{money:+5,freedom:-10,stress:0,happy:+10}, consequence:'Дети получат наследство. Последние годы прожиты бережливо. Деньги без правильного воспитания часто причиняют вред.', insight:'Баффет оставит 99% на благотворительность: "Хочу дать детям достаточно, чтобы они могли делать что угодно, но не так много, чтобы они могли не делать ничего".' },
+      { text:'Прожить на максимум — опыт не накопишь', desc:'Умру с нулём — и это нормально.', type:'good', changes:{money:-10,freedom:+20,stress:-10,happy:+30}, consequence:'Путешествия, встречи, опыт. Дети получили нечто ценнее денег: родителя, который жил полностью.', insight:'"Die With Zero" — обратный расчёт: сколько нужно для комфортной жизни, и потратить именно столько. Деньги — средство конвертации времени в опыт.' },
+      { text:'Половину оставить, половину потратить', desc:'Баланс заботы и жизни.', type:'good', changes:{money:0,freedom:+10,stress:-5,happy:+20}, consequence:'Дети помнят отца, который жил. Небольшое наследство — бонус.', insight:'Финансовое планирование — не про деньги. Это про то, как ты хочешь прожить и кем хочешь быть для тех, кто рядом.' }
+    ]
+  }
+];
+
+const RANDOM_EVENTS = [
+  { icon:'📉', label:'Рыночный кризис', text:'Рынок упал на 40%. Паника вокруг. Твои инвестиции в минусе.', effect:{money:-10,stress:+15} },
+  { icon:'🎉', label:'Неожиданная удача', text:'Старый проект принёс неожиданные роялти. Пассивный доход!', effect:{money:+12,happy:+10} },
+  { icon:'🏥', label:'Медицинские расходы', text:'Незапланированное лечение. Страховка покрыла не всё.', effect:{money:-8,stress:+10} },
+  { icon:'💡', label:'Ментор', text:'Встреча с человеком, который изменил твой взгляд на деньги и жизнь.', effect:{freedom:+10,happy:+8} },
+  { icon:'📈', label:'Бонус', text:'Компания показала рекорд. Бонус — неожиданно большой.', effect:{money:+15,happy:+5} },
+  { icon:'🔥', label:'Выгорание', text:'Слишком много работы. Тело сигнализирует: хватит.', effect:{stress:+20,happy:-10} }
+];
+
+const ARCHETYPES = [
+  { name:'Свободный Стратег', tagline:'Деньги работают на тебя — не ты на них', condition:s=>s.money>=65&&s.freedom>=60,
+    insights:[{title:'Ты мыслишь системно',text:'Твои решения строили долгосрочную картину, а не краткосрочный комфорт. Это редкое и ценное мышление.'},{title:'Ты понимаешь цену свободы',text:'Ты осознанно отказывался от демонстративного потребления ради опциональности. Это и есть путь к настоящему богатству.'},{title:'Ты избегаешь FOMO',text:'Принятие решений из логики, а не страха — твоя суперсила. Большинство финансовых ошибок эмоциональны.'}],
+    patterns:[{color:'#6DB882',text:'Ставишь долгосрочное выше краткосрочного',sub:'Delayed gratification — признак финансовой зрелости'},{color:'#6A9FD0',text:'Ценишь опциональность',sub:'Свобода выбора важнее статуса вещей'}],
+    actions:['Проверь: есть ли 6 месяцев расходов в ликвидном резерве? Это фундамент всей системы.','Автоматизируй 20% дохода в индексный фонд — сегодня, не завтра. Автоматизация убирает силу воли из уравнения.','Посчитай своё "число свободы": сколько нужно пассивного дохода для комфортной жизни?'],
+    quote:'«Богатство — это не про то, сколько у тебя денег. Это про то, сколько у тебя времени.»' },
+  { name:'Строитель Империи', tagline:'Высокий потенциал, высокая цена', condition:s=>s.money>=70&&s.stress>=60,
+    insights:[{title:'Ты максимизируешь доход',text:'Умеешь создавать ценность. Но цена — высокий стресс и риск здоровья.'},{title:'Ты рискуешь правильно?',text:'Вопрос: риски осознанны или из страха остановиться?'},{title:'Есть ли смысл за деньгами?',text:'Для чего ты строишь? Без ответа — гонка без финиша.'}],
+    patterns:[{color:'#E07855',text:'Работаешь больше, чем отдыхаешь',sub:'Краткосрочная стратегия в долгосрочной игре'},{color:'#C9A84C',text:'Высокая мотивация к достижениям',sub:'Сила, которая может стать ловушкой'}],
+    actions:['Посчитай свою "почасовую ставку". Делегируй всё, что дешевле этого.','Установи "стоп-сигнал" для стресса: конкретный показатель, при котором берёшь паузу. Не после инфаркта.','Задай себе: если бы оставалось 5 лет — что изменил бы прямо сейчас?'],
+    quote:'«Нет смысла подниматься по лестнице успеха, если она прислонена к не той стене.»' },
+  { name:'Баланс-Мастер', tagline:'Счастье — это тоже актив', condition:s=>s.happy>=65&&s.stress<=50,
+    insights:[{title:'Ты понимаешь гедоническую адаптацию',text:'Не гонишься за вещами, зная, что счастье от них временно. Это редкая мудрость.'},{title:'Ты ценишь нематериальное',text:'Отношения, здоровье, опыт — твои настоящие активы. Они не обесцениваются.'},{title:'Стабильность как стратегия',text:'Ты выбирал не максимум дохода, а максимум жизни. Это осознанная позиция.'}],
+    patterns:[{color:'#6DB882',text:'Низкий стресс — высокая устойчивость',sub:'Антихрупкость как финансовая стратегия'},{color:'#6A9FD0',text:'Приоритет на опыт, не вещи',sub:'Опыты дают более долгое счастье — это доказано'}],
+    actions:['Проверь: твои расходы отражают твои ценности? Аудит трат за 3 месяца.','Оцени "эмоциональный капитал": качество отношений, здоровье, смысл работы.','Сделай "достаточность-тест": что тебе нужно для счастья? Список короче, чем кажется.'],
+    quote:'«Достаточно — это больше, чем кажется, и меньше, чем нам говорят.»' },
+  { name:'Осознанный Искатель', tagline:'Опыт богаче любого счёта', condition:s=>s.freedom>=65&&s.money<55,
+    insights:[{title:'Ты выбираешь жизнь над цифрами',text:'Свобода важнее накопления. Главное — делать это осознанно.'},{title:'Риск: поздний старт',text:'Без базовых накоплений — уязвимость. Небольшой финансовый буфер нужен даже искателю.'},{title:'Твоё богатство — в историях',text:'Ты накопил опыт, который не купить. Как монетизировать его?'}],
+    patterns:[{color:'#6A9FD0',text:'Высокая свобода как приоритет',sub:'Осознанный выбор или импульс — важно различать'},{color:'#E07855',text:'Финансовый буфер ниже оптимума',sub:'Уязвимость перед кризисами'}],
+    actions:['Создай минимальный буфер: 3 месяца расходов в ликвидном активе.','Монетизируй опыт: консультации, курс, книга — это активы без капитала.','Пересмотри "достаточно": сколько безопасности нужно, чтобы жить так, как хочешь?'],
+    quote:'«Самое богатое путешествие — то, которое ты помнишь на смертном одре.»' },
+  { name:'Поздний Расцвет', tagline:'Осознание — лучший момент начать', condition:s=>s.money<50&&s.stress>=55,
+    insights:[{title:'Ты узнал паттерны ошибок',text:'Это ценнее, чем кажется. Осознание — первый шаг. Большинство людей не доходят до него.'},{title:'Ещё не поздно',text:'Математика сложного процента работает всегда. Любое действие сегодня лучше бездействия.'},{title:'Стресс — сигнал, не приговор',text:'Высокий стресс говорит о несоответствии жизни и ценностей. Что вызывает больше всего напряжения?'}],
+    patterns:[{color:'#E07855',text:'Реактивные решения под давлением',sub:'Стресс ухудшает финансовые решения — это нейронаука'},{color:'#C9A84C',text:'Потенциал к изменению высок',sub:'Осознание + действие = трансформация'}],
+    actions:['Начни с одного: автоматический перевод $100-200/мес на отдельный счёт. Маленький старт важнее идеального.','Разберись с долгами: список с процентными ставками. Гасить в порядке убывания ставки.','Найди ментора или сообщество. Окружение — мощнейший предиктор финансового поведения.'],
+    quote:'«Лучшее время посадить дерево — 20 лет назад. Второе лучшее — сегодня.»' },
+  { name:'Гедонист в Ловушке', tagline:'Беговая дорожка продолжается', condition:s=>true,
+    insights:[{title:'Hedonic treadmill',text:'Доходы росли — расходы вместе. "Беговая дорожка гедониста": скорость увеличивается, расстояние нет.'},{title:'Lifestyle inflation — главный враг богатства',text:'Не низкий доход мешает богатству — рост расходов с доходом. Богатые разрывают эту цепь намеренно.'},{title:'Статус vs свобода',text:'Потребление ради статуса — аренда чужого мнения. Финансовая свобода — владение своим временем.'}],
+    patterns:[{color:'#E07855',text:'Lifestyle inflation подтверждён',sub:'Расходы масштабируются с доходом'},{color:'#C9A84C',text:'Высокое потребление, низкое накопление',sub:'Ключевое уравнение богатства нарушено'}],
+    actions:['Посчитай savings rate — процент дохода, который сохраняешь. Ниже 15%? Это первое, что нужно изменить.','30-дневный тест: перед любой покупкой >$100 жди 30 дней. Большинство желаний исчезают сами.','Найди что реально делает счастливым — и что создаёт иллюзию статуса. Это разные вещи.'],
+    quote:'«Мы покупаем вещи, которые нам не нужны, на деньги которых нет, чтобы произвести впечатление на людей, которые нам безразличны.»' }
+];
+
+// ─── STATE ───
+let state = {
+  playerName:'', startArchetype:0,
+  money:50, freedom:50, stress:30, happy:50,
+  currentScenarioIndex:0, currentEpoch:0,
+  scenariosPerEpoch:[], answered:false,
+  randomEventsShown:new Set()
+};
+
+function clamp(v) { return Math.max(0, Math.min(100, Math.round(v))); }
+
+function buildScenarioOrder() {
+  const byEpoch = [[],[],[],[],[]];
+  SCENARIOS.forEach((s, i) => byEpoch[s.epoch].push(i));
+  // Shuffle each epoch
+  byEpoch.forEach(arr => { for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} });
+  state.scenariosPerEpoch = byEpoch;
+}
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function confirmName() {
+  const n = document.getElementById('player-name-input').value.trim();
+  if(!n) { document.getElementById('player-name-input').focus(); return; }
+  state.playerName = n;
+  goTo('screen-archetype');
+}
+
+function selectArchetype(idx) {
+  state.startArchetype = idx;
+  document.querySelectorAll('.arch-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.arch-card')[idx].classList.add('selected');
+  const bonuses = [{money:+20,stress:-10},{freedom:+20,stress:+15},{money:+10,happy:+10}];
+  const b = bonuses[idx];
+  if(b.money) state.money = clamp(state.money+b.money);
+  if(b.freedom) state.freedom = clamp(state.freedom+(b.freedom||0));
+  if(b.stress) state.stress = clamp(state.stress+b.stress);
+  if(b.happy) state.happy = clamp(state.happy+(b.happy||0));
+  setTimeout(()=>startGame(), 400);
+}
+
+function startGame() {
+  buildScenarioOrder();
+  state.currentEpoch = 0;
+  state.currentScenarioIndex = 0;
+  document.getElementById('header-name').textContent = state.playerName;
+  updateStats();
+  buildEpochDots();
+  goTo('screen-game');
+  renderScenario();
+}
+
+function buildEpochDots() {
+  const container = document.getElementById('epoch-dots');
+  container.innerHTML = '';
+  EPOCHS.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'epoch-dot'+(i===0?' active':'');
+    d.id = 'edot-'+i;
+    container.appendChild(d);
+  });
+}
+
+function getCurrentScenarios() { return state.scenariosPerEpoch[state.currentEpoch]||[]; }
+
+function renderScenario() {
+  const epochScenarios = getCurrentScenarios();
+  const localIdx = state.currentScenarioIndex;
+  if(localIdx >= epochScenarios.length) { showEpochTransition(); return; }
+
+  const scenarioIdx = epochScenarios[localIdx];
+  const s = SCENARIOS[scenarioIdx];
+  state.answered = false;
+
+  const progress = (localIdx/epochScenarios.length)*100;
+  document.getElementById('epoch-fill').style.width = progress+'%';
+  document.getElementById('epoch-label').textContent = 'Эпоха '+(state.currentEpoch+1)+' · '+EPOCHS[state.currentEpoch].name;
+  document.getElementById('epoch-step').textContent = EPOCHS[state.currentEpoch].ages;
+
+  const ages=[22,28,35,45,55], endAges=[28,35,45,55,62];
+  const ea=ages[state.currentEpoch], ee=endAges[state.currentEpoch];
+  const approxAge = Math.round(ea+(localIdx/epochScenarios.length)*(ee-ea));
+  document.getElementById('current-age').textContent = approxAge+' лет';
+
+  let randomHtml = '';
+  const reKey = state.currentEpoch+'-'+localIdx;
+  if(Math.random()<0.3 && !state.randomEventsShown.has(reKey)) {
+    state.randomEventsShown.add(reKey);
+    const re = RANDOM_EVENTS[Math.floor(Math.random()*RANDOM_EVENTS.length)];
+    state.money = clamp(state.money+(re.effect.money||0));
+    state.freedom = clamp(state.freedom+(re.effect.freedom||0));
+    state.stress = clamp(state.stress+(re.effect.stress||0));
+    state.happy = clamp(state.happy+(re.effect.happy||0));
+    updateStats();
+    randomHtml = `<div class="random-event-banner"><div class="random-icon">${re.icon}</div><div><div class="random-label">${re.label}</div><div class="random-text">${re.text}</div></div></div>`;
+  }
+
+  const letterMap=['A','B','C'];
+  const choicesHtml = s.choices.map((c,i)=>`
+    <button class="choice-btn" id="choice-${i}" onclick="selectChoice(${i})">
+      <div class="choice-letter">${letterMap[i]}</div>
+      <div class="choice-text"><strong>${c.text}</strong><span class="choice-desc">${c.desc}</span></div>
+    </button>`).join('');
+
+  document.getElementById('scenario-area').innerHTML = `
+    ${randomHtml}
+    <div class="event-badge">${s.type}</div>
+    <div class="scenario-card">
+      <div class="scenario-context">${s.age}</div>
+      <div class="scenario-question">${s.question}</div>
+      <div class="scenario-setup">${s.setup}</div>
+      <div class="choices">${choicesHtml}</div>
+      <div class="consequence-panel" id="consequence-panel"></div>
+    </div>`;
+}
+
+function selectChoice(choiceIdx) {
+  if(state.answered) return;
+  state.answered = true;
+
+  const epochScenarios = getCurrentScenarios();
+  const s = SCENARIOS[epochScenarios[state.currentScenarioIndex]];
+  const choice = s.choices[choiceIdx];
+
+  if(choice.changes) {
+    state.money = clamp(state.money+(choice.changes.money||0));
+    state.freedom = clamp(state.freedom+(choice.changes.freedom||0));
+    state.stress = clamp(state.stress+(choice.changes.stress||0));
+    state.happy = clamp(state.happy+(choice.changes.happy||0));
+  }
+  updateStats();
+
+  document.querySelectorAll('.choice-btn').forEach((btn,i)=>{
+    if(i===choiceIdx) {
+      if(choice.type==='good') btn.classList.add('selected');
+      else if(choice.type==='wrong') btn.classList.add('wrong');
+      else btn.classList.add('neutral-pick');
+    }
+    btn.disabled = true;
+    btn.style.opacity = i===choiceIdx?'1':'0.4';
+  });
+
+  const changes = choice.changes||{};
+  const labels = {money:'💰 Капитал',freedom:'🕊 Свобода',stress:'🔥 Стресс',happy:'✨ Счастье'};
+  const pills = Object.entries(changes).filter(([,v])=>v!==0).map(([k,v])=>{
+    const cls=(k==='stress')?(v>0?'change-neg':'change-pos'):(v>0?'change-pos':'change-neg');
+    return `<span class="stat-change ${cls}">${labels[k]} ${v>0?'+':''}${v}</span>`;
+  }).join('');
+
+  const panel = document.getElementById('consequence-panel');
+  panel.innerHTML = `
+    <div class="consequence-title">Что произошло</div>
+    <div class="consequence-text">${choice.consequence}</div>
+    <div class="stat-changes">${pills}</div>
+    <div class="insight-box"><div class="insight-label">Психологический инсайт</div><div class="insight-text">${choice.insight}</div></div>
+    <button class="btn-next" onclick="nextScenario()">Следующая ситуация →</button>`;
+  panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function nextScenario() {
+  state.currentScenarioIndex++;
+  renderScenario();
+  window.scrollTo(0,0);
+}
+
+function updateStats() {
+  ['money','freedom','stress','happy'].forEach(k=>{
+    const v=state[k];
+    document.getElementById('sv-'+k).textContent = v;
+    document.getElementById('sf-'+k).style.width = v+'%';
+  });
+}
+
+function showEpochTransition() {
+  const e = EPOCHS[state.currentEpoch];
+  const dot = document.getElementById('edot-'+state.currentEpoch);
+  if(dot) { dot.classList.remove('active'); dot.classList.add('done'); }
+  const nextDot = document.getElementById('edot-'+(state.currentEpoch+1));
+  if(nextDot) nextDot.classList.add('active');
+
+  document.getElementById('trans-icon').textContent = e.icon;
+  document.getElementById('trans-epoch').textContent = 'Эпоха '+(state.currentEpoch+1)+' завершена';
+  document.getElementById('trans-title').textContent = e.name;
+  document.getElementById('trans-age').textContent = 'Тебе '+e.endAge;
+  document.getElementById('trans-desc').textContent = e.desc;
+  document.getElementById('ts-money').textContent = state.money;
+  document.getElementById('ts-free').textContent = state.freedom;
+  document.getElementById('ts-stress').textContent = state.stress;
+  document.getElementById('ts-happy').textContent = state.happy;
+
+  if(state.currentEpoch>=EPOCHS.length-1) {
+    document.getElementById('trans-epoch').textContent = 'Игра завершена';
+    document.getElementById('trans-title').textContent = 'Путь пройден';
+    document.getElementById('trans-btn').textContent = 'Узнать свой архетип →';
+    document.getElementById('trans-btn').onclick = showResult;
+  } else {
+    document.getElementById('trans-btn').textContent = 'Следующая эпоха →';
+    document.getElementById('trans-btn').onclick = continueAfterTransition;
+  }
+  goTo('screen-transition');
+}
+
+function continueAfterTransition() {
+  if(state.currentEpoch<EPOCHS.length-1) {
+    state.currentEpoch++;
+    state.currentScenarioIndex = 0;
+    goTo('screen-game');
+    renderScenario();
+  } else { showResult(); }
+}
+
+function showResult() {
+  const arch = ARCHETYPES.find(a=>a.condition(state))||ARCHETYPES[ARCHETYPES.length-1];
+  document.getElementById('res-arch-name').textContent = arch.name;
+  document.getElementById('res-arch-tagline').textContent = arch.tagline;
+  ['money','freedom','stress','happy'].forEach(k=>{
+    document.getElementById('res-'+k).textContent = state[k];
+    document.getElementById('res-fill-'+k).style.width = state[k]+'%';
+  });
+  document.getElementById('insights-list').innerHTML = arch.insights.map((ins,i)=>`
+    <div class="insight-card">
+      <div class="insight-num">0${i+1}</div>
+      <div><div class="insight-content-title">${ins.title}</div><div class="insight-content-text">${ins.text}</div></div>
+    </div>`).join('');
+  document.getElementById('patterns-list').innerHTML = arch.patterns.map(p=>`
+    <div class="pattern-item">
+      <div class="pattern-dot" style="background:${p.color}"></div>
+      <div><div class="pattern-text">${p.text}</div><div class="pattern-sub">${p.sub}</div></div>
+    </div>`).join('');
+  document.getElementById('actions-list').innerHTML = arch.actions.map(a=>`
+    <div class="action-item"><div class="action-check"></div><div class="action-text">${a}</div></div>`).join('');
+  document.getElementById('res-closing-quote').textContent = arch.quote;
+  goTo('screen-result');
+}
+
+function restartGame() {
+  state = {
+    playerName:state.playerName, startArchetype:0,
+    money:50, freedom:50, stress:30, happy:50,
+    currentScenarioIndex:0, currentEpoch:0,
+    scenariosPerEpoch:[], answered:false,
+    randomEventsShown:new Set()
+  };
+  goTo('screen-archetype');
+}
+</script>
+</body>
+</html>
